@@ -100,3 +100,21 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Mapbox for the mapping platform
 - Supabase for the backend services
 - Next.js team for the amazing framework
+
+## End-to-End Testing (Cypress)
+
+This project uses [Cypress](https://www.cypress.io/) for end-to-end (E2E) testing.
+
+### How to Run Cypress Tests
+
+1. Start your development server:
+   ```sh
+   npm run dev
+   ```
+2. In another terminal, open Cypress:
+   ```sh
+   npx cypress open
+   ```
+3. Run the E2E tests from the Cypress UI.
+
+Test files are located in the `cypress/e2e/` directory.
