@@ -1,4 +1,4 @@
-# 🕌 Tafweej Hajj - Real-Time Crowd Management for Pilgrims
+# 🕌 Tafweej Hajj - Smart Crowd Management for Pilgrims
 
 Welcome to the **Tafweej Hajj** project! This system aims to improve the pilgrimage experience by providing real-time crowd management, route planning, and safety alerts for Hajj pilgrims.
 
