@@ -51,7 +51,7 @@ export default function LoginPage() {
             <span className="text-5xl">🕋</span>
           </div>
           <h1 className="text-4xl font-bold mb-2 text-gray-900">
-            <span className="bg-gradient-to-r from-indigo-600 to-indigo-800 bg-clip-text text-transparent">
+            <span className="text-primary">
               Tafweej
             </span>{' '}
             Hajj
@@ -99,7 +99,7 @@ export default function LoginPage() {
           <div>
             <button
               type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              className="w-full py-2 px-4 rounded-md text-white bg-primary hover:bg-primary-dark font-semibold shadow"
             >
               Sign in
             </button>
@@ -108,11 +108,18 @@ export default function LoginPage() {
         <div className="text-center">
           <p className="text-sm text-gray-600">
             Don't have an account?{' '}
-            <Link href="/signup" className="font-medium text-indigo-600 hover:text-indigo-500">
+            <Link href="/signup" className="font-medium text-primary hover:text-primary-dark">
               Sign up
             </Link>
           </p>
         </div>
+        <button
+          type="button"
+          className="w-full mt-4 py-2 px-4 rounded-md text-primary border border-primary bg-white hover:bg-primary hover:text-white font-semibold shadow transition"
+          onClick={() => router.push('/identify')}
+        >
+          Back
+        </button>
       </div>
     </div>
   );

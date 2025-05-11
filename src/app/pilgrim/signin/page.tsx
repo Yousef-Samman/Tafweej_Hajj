@@ -64,6 +64,13 @@ export default function PilgrimSignIn() {
             Continue
           </button>
         </form>
+        <button
+          type="button"
+          className="w-full mt-4 py-2 px-4 rounded-md text-primary border border-primary bg-white hover:bg-primary hover:text-white font-semibold shadow transition"
+          onClick={() => router.push('/identify')}
+        >
+          Back
+        </button>
       </div>
     </div>
   );

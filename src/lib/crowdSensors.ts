@@ -1,5 +1,6 @@
 // Simulated crowd density sensor network for Hajj sites
 import { supabaseAdmin } from './supabase';
+import { CohereClient } from 'cohere-ai';
 
 // Define types for our locations data
 type LocationSection = {
@@ -141,6 +142,29 @@ const WEATHER_MODIFIERS = {
   rain: 0.7, // Rain reduces outdoor densities 
   pleasant: 1.2, // Pleasant weather increases movement
 };
+
+const cohere = new CohereClient({ token: process.env.COHERE_API_KEY! });
+
+/**
+ * Predicts crowd movement using Cohere AI
+ * @param crowdData - An object mapping location names to density levels
+ * @param time - Current time (string)
+ * @param weather - Current weather (string)
+ * @param event - Current event (string)
+ * @returns The AI's prediction as a string
+ */
+export async function predictCrowdMovement(crowdData: Record<string, string>, time: string, weather: string, event: string): Promise<string> {
+  const prompt = `\nCurrent crowd densities:\n${Object.entries(crowdData).map(([loc, density]) => `- ${loc}: ${density}`).join('\n')}\nTime: ${time}\nWeather: ${weather}\nEvent: ${event}\n\nQuestion: Based on this information, where are most pilgrims likely to move next? Respond with the most likely destination and a short explanation.`;
+
+  const response = await cohere.generate({
+    model: 'command',
+    prompt,
+    maxTokens: 60,
+    temperature: 0.3,
+  });
+
+  return response.generations[0].text.trim();
+}
 
 // Function to get realistic crowd densities based on various factors
 export async function calculateRealisticCrowdDensities() {

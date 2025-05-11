@@ -7,6 +7,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import MapboxDirections from '@mapbox/mapbox-gl-directions/dist/mapbox-gl-directions';
 import '@mapbox/mapbox-gl-directions/dist/mapbox-gl-directions.css';
 import type { FeatureCollection, Feature, Point } from 'geojson';
+import { predictCrowdMovement } from '@/lib/crowdSensors';
 
 // For development, directly use the token
 // In production, this should use environment variables properly
@@ -489,6 +490,8 @@ export default function MapComponent({ crowdData = [] }: MapComponentProps) {
   const animationFrameId = useRef<number | null>(null);
   const [isMounted, setIsMounted] = useState(false);
   const routeCoordsRef = useRef<[number, number][]>([]);
+  const [prediction, setPrediction] = useState('');
+  const [predictionLoading, setPredictionLoading] = useState(false);
 
   // Use real data if available, otherwise use mock data
   const displayData = crowdData.length > 0 ? crowdData : MOCK_CROWD_DATA;
@@ -497,6 +500,34 @@ export default function MapComponent({ crowdData = [] }: MapComponentProps) {
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  useEffect(() => {
+    async function fetchPrediction() {
+      setPredictionLoading(true);
+      try {
+        const now = new Date();
+        const time = now.toLocaleTimeString();
+        const weather = 'hot'; // Replace with real weather if available
+        const event = 'General movement'; // Replace with real event if available
+        const crowdDensities: Record<string, string> = {};
+        (crowdData.length > 0 ? crowdData : MOCK_CROWD_DATA).forEach(loc => {
+          crowdDensities[loc.location_name] = loc.density_level;
+        });
+        const res = await fetch('/api/predict-crowd-movement', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ crowdData: crowdDensities, time, weather, event }),
+        });
+        const data = await res.json();
+        setPrediction(data.prediction || 'Unable to fetch prediction at this time.');
+      } catch (err) {
+        setPrediction('Unable to fetch prediction at this time.');
+      } finally {
+        setPredictionLoading(false);
+      }
+    }
+    fetchPrediction();
+  }, [crowdData]);
 
   // Handle location selection
   const handleLocationSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {

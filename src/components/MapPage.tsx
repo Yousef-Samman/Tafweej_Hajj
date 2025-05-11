@@ -93,6 +93,104 @@ const FALLBACK_MOCK_DATA: CrowdDensity[] = [
   }
 ];
 
+function AICrowdPredictionBox({ crowdData }: { crowdData: CrowdDensity[] }) {
+  const [prediction, setPrediction] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    async function fetchPrediction() {
+      setLoading(true);
+      setError('');
+      setPrediction('');
+      try {
+        const now = new Date();
+        const time = now.toLocaleTimeString();
+        const weather = 'hot'; // Replace with real weather if available
+        const event = 'General movement'; // Replace with real event if available
+        const crowdDensities: Record<string, string> = {};
+        (crowdData || []).forEach((loc: CrowdDensity) => {
+          crowdDensities[loc.location_name] = loc.density_level;
+        });
+        const res = await fetch('/api/predict-crowd-movement', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ crowdData: crowdDensities, time, weather, event })
+        });
+        if (!res.ok) throw new Error('API error');
+        const data = await res.json();
+        setPrediction(data.prediction);
+      } catch (err) {
+        setError('Unable to fetch prediction at this time.');
+      } finally {
+        setLoading(false);
+      }
+    }
+    if (crowdData && crowdData.length > 0) fetchPrediction();
+  }, [JSON.stringify(crowdData)]);
+
+  return (
+    <div className="mt-4 p-4 rounded border-l-4 border-yellow-400 bg-yellow-50 flex items-start shadow">
+      <span className="text-2xl mr-3">⚠️</span>
+      <div>
+        <div className="font-semibold text-yellow-800 mb-1">Crowd Movement Prediction</div>
+        <div className="text-yellow-800 text-sm">
+          {loading ? 'Loading prediction...' : error ? error : prediction}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AICongestionAdviceBox({ crowdData }: { crowdData: CrowdDensity[] }) {
+  const [advice, setAdvice] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    async function fetchAdvice() {
+      setLoading(true);
+      setError('');
+      setAdvice('');
+      try {
+        const now = new Date();
+        const time = now.toLocaleTimeString();
+        const weather = 'hot'; // Replace with real weather if available
+        const event = 'General movement'; // Replace with real event if available
+        const crowdDensities: Record<string, string> = {};
+        (crowdData || []).forEach((loc: CrowdDensity) => {
+          crowdDensities[loc.location_name] = loc.density_level;
+        });
+        const res = await fetch('/api/predict-crowd-management-advice', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ crowdData: crowdDensities, time, weather, event })
+        });
+        if (!res.ok) throw new Error('API error');
+        const data = await res.json();
+        setAdvice(data.advice);
+      } catch (err) {
+        setError('Unable to fetch advice at this time.');
+      } finally {
+        setLoading(false);
+      }
+    }
+    if (crowdData && crowdData.length > 0) fetchAdvice();
+  }, [JSON.stringify(crowdData)]);
+
+  return (
+    <div className="mt-4 p-4 rounded border-l-4 border-blue-400 bg-blue-50 flex items-start shadow">
+      <span className="text-2xl mr-3 text-blue-500" aria-label="Info">ℹ️</span>
+      <div>
+        <div className="font-semibold text-blue-800 mb-1">Congestion Management Advice</div>
+        <div className="text-blue-800 text-sm">
+          {loading ? 'Loading advice...' : error ? error : advice}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function MapPage() {
   const [crowdData, setCrowdData] = useState<CrowdDensity[]>([]);
   const [loading, setLoading] = useState(true);
@@ -471,26 +569,9 @@ export default function MapPage() {
                 </div>
               </div>
             </div>
-            {/* Congestion Management Advice */}
-            <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-              <h4 className="text-sm font-medium text-slate-800 dark:text-slate-200 mb-2">Congestion Management Advice</h4>
-              {insights.pilgrimDistribution.critical.percentage > 20 ? (
-                <div className="text-xs p-2 bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300 rounded">
-                  <p className="font-medium">High Alert: Critical congestion levels detected</p>
-                  <p className="mt-1">Consider redirecting {Math.round(insights.pilgrimDistribution.critical.percentage / 2)}% of pilgrims from critical areas to lower density zones.</p>
-                </div>
-              ) : insights.pilgrimDistribution.critical.percentage > 10 ? (
-                <div className="text-xs p-2 bg-orange-50 dark:bg-orange-900/20 text-orange-800 dark:text-orange-300 rounded">
-                  <p className="font-medium">Moderate Risk: Monitor critical areas closely</p>
-                  <p className="mt-1">Consider implementing crowd control measures in {insights.criticalAreas.join(', ')}.</p>
-                </div>
-              ) : (
-                <div className="text-xs p-2 bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-300 rounded">
-                  <p className="font-medium">Good Distribution: Pilgrim flow is balanced</p>
-                  <p className="mt-1">Current distribution is optimal. Continue regular monitoring.</p>
-                </div>
-              )}
-            </div>
+            {/* Congestion Management Advice and Crowd Movement Prediction */}
+            <AICongestionAdviceBox crowdData={crowdData} />
+            <AICrowdPredictionBox crowdData={crowdData} />
           </div>
           {/* Map in a card */}
           <div className="card h-[70vh] relative border border-slate-200 dark:border-gray-700 rounded-lg shadow-lg overflow-hidden">
