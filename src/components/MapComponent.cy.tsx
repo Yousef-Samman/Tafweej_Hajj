@@ -1,9 +1,9 @@
 import React from 'react'
-import MapComponent from './MapComponent'
+import MapComponent, { MOCK_CROWD_DATA } from './MapComponent'
 
 describe('<MapComponent />', () => {
   it('renders', () => {
     // see: https://on.cypress.io/mounting-react
-    cy.mount(<MapComponent />)
+    cy.mount(<MapComponent crowdData={MOCK_CROWD_DATA} />)
   })
 })

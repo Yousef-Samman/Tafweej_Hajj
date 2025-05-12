@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { calculateRealisticCrowdDensities } from '@/lib/crowdSensors';
+import type { NextRequest } from 'next/server';
 
 // Simple graph representing distances between locations (in km)
 const DISTANCE_GRAPH: Record<string, Record<string, number>> = {
@@ -38,6 +39,9 @@ const DISTANCE_GRAPH: Record<string, Record<string, number>> = {
 
 // Average walking speed in km/h, will be adjusted based on crowd density
 const AVG_WALKING_SPEED = 4;
+
+// Mark this route as dynamic
+export const dynamic = 'force-dynamic';
 
 // Calculate route considering crowd density
 async function calculateRouteWithCrowdDensity(start: string, destination: string) {

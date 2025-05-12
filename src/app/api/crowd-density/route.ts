@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { updateCrowdDensityData, calculateRealisticCrowdDensities } from '@/lib/crowdSensors';
 
+// Mark this route as dynamic
+export const dynamic = 'force-dynamic';
+
 // GET handler to fetch crowd density data
 export async function GET(request: Request) {
   try {

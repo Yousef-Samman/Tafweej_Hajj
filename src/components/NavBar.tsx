@@ -22,7 +22,7 @@ export default function NavBar() {
     router.push('/identify');
   };
 
-  const isPilgrim = pathname.startsWith('/pilgrim');
+  const isPilgrim = pathname?.startsWith('/pilgrim') ?? false;
 
   return (
     <header className="bg-white dark:bg-gray-800 border-b border-slate-200 dark:border-gray-700 backdrop-blur-sm">

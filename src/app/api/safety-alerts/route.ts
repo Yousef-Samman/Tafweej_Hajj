@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 
+// Mark this route as dynamic
+export const dynamic = 'force-dynamic';
+
 // GET handler to fetch safety alerts
 export async function GET() {
   // Return mock data for now
