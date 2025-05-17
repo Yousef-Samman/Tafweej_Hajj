@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabaseClient';
 
@@ -10,23 +10,65 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isAdminLogin = searchParams?.get('type') === 'admin';
+
+  useEffect(() => {
+    // Check if user is already logged in
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user?.user_metadata?.role === 'admin') {
+          router.push('/');
+        } else {
+          setError('This login is for admin users only.');
+          await supabase.auth.signOut();
+        }
+      }
+    };
+    checkSession();
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
+
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      // Log environment variables (masked for security)
+      console.log('Supabase URL available:', !!process.env.NEXT_PUBLIC_SUPABASE_URL);
+      console.log('Supabase Anon Key available:', !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
-      if (error) {
-        setError('Failed to login. Please check your credentials.');
+
+      if (signInError) {
+        console.error('Login error:', signInError);
+        setError(signInError.message || 'Failed to login. Please check your credentials.');
+        setLoading(false);
         return;
       }
-      router.push('/');
+
+      if (data?.user) {
+        // Check if user has admin role
+        if (isAdminLogin && data.user.user_metadata?.role !== 'admin') {
+          setError('This login is for admin users only.');
+          await supabase.auth.signOut();
+          setLoading(false);
+          return;
+        }
+        router.push('/');
+      }
     } catch (err) {
+      console.error('Login error:', err);
       setError('Failed to login. Please check your credentials.');
+    } finally {
+      setLoading(false);
     }
   };
 

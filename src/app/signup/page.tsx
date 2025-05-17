@@ -11,29 +11,56 @@ export default function SignUpPage() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
 
     if (password !== confirmPassword) {
       setError('Passwords do not match');
+      setLoading(false);
       return;
     }
 
     try {
-      const { error } = await supabase.auth.signUp({
+      // Log environment variables (masked for security)
+      console.log('Supabase URL available:', !!process.env.NEXT_PUBLIC_SUPABASE_URL);
+      console.log('Supabase Anon Key available:', !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+
+      const { data, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/login`,
+          data: {
+            role: 'admin' // Add role metadata
+          }
+        }
       });
-      if (error) {
-        setError('Failed to create account. Please try again.');
+
+      if (signUpError) {
+        console.error('Signup error:', signUpError);
+        setError(signUpError.message || 'Failed to create account. Please try again.');
+        setLoading(false);
         return;
       }
-      router.push('/login');
+
+      if (data?.user) {
+        // Check if email confirmation is required
+        if (data.session === null) {
+          setError('Please check your email for a confirmation link to complete your registration.');
+        } else {
+          router.push('/');
+        }
+      }
     } catch (err) {
+      console.error('Signup error:', err);
       setError('Failed to create account. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
